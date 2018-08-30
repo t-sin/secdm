@@ -18,8 +18,8 @@ class Machine(object):
         self.c = []
         self.d = None
 
-        self._stop = False
-        self._debug = False
+        self._stop_ = False
+        self._debug_ = False
 
     def __getattr__(self, name):
         if name == 'st':
@@ -35,10 +35,13 @@ class Machine(object):
   d = {}
 '''.format(*self.st)
 
+    def _stop(self):
+        self._stop_ = True
+
     def step(self):
         op = self.c[0]
 
-        if self._debug is True:
+        if self._debug_ is True:
             print(self)
             print('  OP: {}'.format(op))
 
@@ -49,7 +52,7 @@ class Machine(object):
         self.d = d
 
     def run(self):
-        while not self._stop:
+        while not self._stop_:
             if len(self.c) == 0:
                 print('Machine stopped by empty code.')
                 print(self)
@@ -85,12 +88,14 @@ opcode = {
     'div': None,
     'rem': None,
     'leq': None,
-    'stop': None,
+    'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
 }
 
+
 if __name__ == '__main__':
-    code = []
+    code = [['stop']]
     m = Machine()
-    m._debug = True
+    m.c = code
+    m._debug_ = True
 
     m.run()
