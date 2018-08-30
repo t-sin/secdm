@@ -12,15 +12,23 @@ class Cons(object):
     def __repr__(self):
         return '({} . {})'.format(self.car, self.cdr)
 
+class Func(object):
+    def __init__(self, code, env):
+        self.code = code
+        self.env = env
+
+    def __repr__(self):
+        return 'fn<{}, {}>'.format(self.code, self.env)
+
 # instructions
 #
 # they take few args; secd machine and others...
 OPCODE = {
     'ld': lambda m, n: ([e.n] + m.s, m.e, m.c[1:], m.d),
     'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
-    'ldf': None,
-    'ap': None,
-    'rtn': None,
+    'ldf': lambda m, c: ([Func(m.c[0][1], [m.e])] + m.s, m.e, m.c[1:], m.d),
+    'ap': lambda m: ([], [[m.s[1]] + m.e], [m.s[0].code], [(m.s[2:], m.e, m.c)] + m.d),
+    'rtn': lambda m: ([m.s[0]] + m.d[0][0], m.d[0][1], m.d[0][2], m.d[1:]),
     'dum': None,
     'rap': None,
     'sel': lambda m, ct, cf: (m.s[1:], m.e, m.c[0] if m.s[0] else m.c[1], [m.c[2:]] + m.d),
@@ -47,7 +55,7 @@ class Machine(object):
         self.s = []
         self.e = []
         self.c = []
-        self.d = None
+        self.d = []
 
         self._stop_ = False
         self._debug_ = False
@@ -97,7 +105,7 @@ class Machine(object):
 
 
 if __name__ == '__main__':
-    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'], ['stop']]
+    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'], ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['ap'], ['stop']]
     m = Machine()
     m.c = code
     m._debug_ = True
