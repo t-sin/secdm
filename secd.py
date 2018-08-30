@@ -65,7 +65,7 @@ class Machine(object):
 # they take few args; secd machine and others...
 opcode = {
     'ld': lambda m, n: ([e.n] + m.s, m.e, m.c[1:], m.d),
-    'ldc': None,
+    'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
     'ldf': None,
     'ap': None,
     'rtn': None,
