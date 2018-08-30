@@ -5,6 +5,12 @@ def rplaca(e, v):
     return None
 
 
+
+class Cons(object):
+    def __init__(self, car, cdr):
+        self.car = car
+        self.cdr = cdr
+
 # instructions
 #
 # they take few args; secd machine and others...
@@ -18,17 +24,17 @@ OPCODE = {
     'rap': None,
     'sel': None,
     'join': None,
-    'car': None,
-    'cdr': None,
-    'atom': None,
-    'cons': None,
-    'eq': None,
-    'add': None,
-    'sub': None,
-    'mul': None,
-    'div': None,
-    'rem': None,
-    'leq': None,
+    'car': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
+    'cdr': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
+    'atom': lambda m: ([type(m.s[0]) is Cons] + m.s[1:], m.e, m.c[1:], m.d),
+    'cons': lambda m: ([Cons(m.s[0], m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'eq': lambda m: ([(m.s[0] == m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'add': lambda m: ([(m.s[0] + m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'sub': lambda m: ([(m.s[0] - m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'mul': lambda m: ([(m.s[0] * m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'div': lambda m: ([(m.s[0] / m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'rem': lambda m: ([(m.s[0] % m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
+    'leq': lambda m: ([(m.s[0] <= m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
     'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
 }
 
