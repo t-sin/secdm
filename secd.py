@@ -4,12 +4,13 @@ def rplaca(e, v):
     '''Replace specified value of environment??'''
     return None
 
-
-
 class Cons(object):
     def __init__(self, car, cdr):
         self.car = car
         self.cdr = cdr
+
+    def __repr__(self):
+        return '({} . {})'.format(self.car, self.cdr)
 
 # instructions
 #
@@ -22,8 +23,8 @@ OPCODE = {
     'rtn': None,
     'dum': None,
     'rap': None,
-    'sel': None,
-    'join': None,
+    'sel': lambda m, ct, cf: (m.s[1:], m.e, m.c[0] if m.s[0] else m.c[1], [m.c[2:]] + m.d),
+    'join': lambda m: (m.s, m.e, m.d[0], m.d[1:]),
     'car': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
     'cdr': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
     'atom': lambda m: ([type(m.s[0]) is Cons] + m.s[1:], m.e, m.c[1:], m.d),
@@ -96,7 +97,7 @@ class Machine(object):
 
 
 if __name__ == '__main__':
-    code = [['stop']]
+    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'], ['stop']]
     m = Machine()
     m.c = code
     m._debug_ = True
