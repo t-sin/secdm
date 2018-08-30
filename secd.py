@@ -1,9 +1,5 @@
 #!/usr/bin/ppython
 
-def locate(e, n):
-    '''Returns element of environment at index `n`'''
-    return e[n]
-
 def rplaca(e, v):
     '''Replace specified value of environment??'''
     return None
