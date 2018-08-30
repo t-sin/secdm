@@ -5,6 +5,34 @@ def rplaca(e, v):
     return None
 
 
+# instructions
+#
+# they take few args; secd machine and others...
+OPCODE = {
+    'ld': lambda m, n: ([e.n] + m.s, m.e, m.c[1:], m.d),
+    'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
+    'ldf': None,
+    'ap': None,
+    'rtn': None,
+    'dum': None,
+    'rap': None,
+    'sel': None,
+    'join': None,
+    'car': None,
+    'cdr': None,
+    'atom': None,
+    'cons': None,
+    'eq': None,
+    'add': None,
+    'sub': None,
+    'mul': None,
+    'div': None,
+    'rem': None,
+    'leq': None,
+    'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
+}
+
+
 class Machine(object):
     '''SECD machine: state and runner'''
 
@@ -41,7 +69,7 @@ class Machine(object):
             print(self)
             print('  OP: {}'.format(op))
 
-        s, e, c, d = opcode[op[0]](self, *op[1:])
+        s, e, c, d = OPCODE[op[0]](self, *op[1:])
         self.s = s
         self.e = e
         self.c = c
@@ -59,33 +87,6 @@ class Machine(object):
         print('Machine stopped.')
         print(self)
 
-
-# instructions
-#
-# they take few args; secd machine and others...
-opcode = {
-    'ld': lambda m, n: ([e.n] + m.s, m.e, m.c[1:], m.d),
-    'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
-    'ldf': None,
-    'ap': None,
-    'rtn': None,
-    'dum': None,
-    'rap': None,
-    'sel': None,
-    'join': None,
-    'car': None,
-    'cdr': None,
-    'atom': None,
-    'cons': None,
-    'eq': None,
-    'add': None,
-    'sub': None,
-    'mul': None,
-    'div': None,
-    'rem': None,
-    'leq': None,
-    'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
-}
 
 
 if __name__ == '__main__':
