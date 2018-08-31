@@ -1,8 +1,12 @@
 #!/usr/bin/ppython
 
 def rplaca(e, v):
-    '''Replace specified value of environment??'''
-    return None
+    '''Replace environment stack head with specified value'''
+    if e[0] == 'omega':
+        e[0] = v
+    else:
+        raise Exception('e stack top is not "omega"')
+    return e
 
 class Cons(object):
     def __init__(self, car, cdr):
@@ -29,8 +33,8 @@ OPCODE = {
     'ldf': lambda m, c: ([Func(m.c[0][1], [m.e])] + m.s, m.e, m.c[1:], m.d),
     'ap': lambda m: ([], [m.s[1]] + m.e, m.s[0].code, [(m.s[2:], m.e, m.c[1:])] + m.d),
     'rtn': lambda m: ([m.s[0]] + m.d[0][0], m.d[0][1], m.d[0][2], m.d[1:]),
-    'dum': None,
-    'rap': None,
+    'dum': lambda m: (m.s, ['omega'] + m.e, m.c[1:], m.d),
+    'rap': lambda m: ([], rplaca(m.e, m.s[1]), m.s[0].code, [(m.s[2:], m.e, m.c[1:])] + m.d),
     'sel': lambda m, ct, cf: (m.s[1:], m.e, m.c[0] if m.s[0] else m.c[1], [m.c[2:]] + m.d),
     'join': lambda m: (m.s, m.e, m.d[0], m.d[1:]),
     'car': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
@@ -105,7 +109,11 @@ class Machine(object):
 
 
 if __name__ == '__main__':
-    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'], ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['ap'], ['stop']]
+    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'],
+            ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['ap'],
+            ['dum'],
+            ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['rap'],
+            ['stop']]
     m = Machine()
     m.c = code
     m._debug_ = True
