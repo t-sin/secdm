@@ -97,15 +97,16 @@ class Machine(object):
     def run(self):
         while not self._stop_:
             if len(self.c) == 0:
-                print('Machine stopped by empty code.')
-                print(self)
+                if self._debug_:
+                    print('Machine stopped by empty code.')
+                    print(self)
                 return
 
             self.step()
 
-        print('Machine stopped.')
-        print(self)
-
+        if self._debug_:
+            print('Machine stopped.')
+            print(self)
 
 
 if __name__ == '__main__':
@@ -116,6 +117,6 @@ if __name__ == '__main__':
             ['stop']]
     m = Machine()
     m.c = code
-    m._debug_ = True
+    m._debug_ = False
 
     m.run()
