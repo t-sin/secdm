@@ -49,6 +49,11 @@ OPCODE = {
     'rem': lambda m: ([(m.s[0] % m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
     'leq': lambda m: ([(m.s[0] <= m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
     'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
+
+    'read': lambda m: ([input('')] + m.s, m.e, m.c[1:], m.d),
+    'write': lambda m: print(m.s[0]) or (m.s[1:], m.e, m.c[1:], m.d),
+    'toi': lambda m: ([int(m.s[0])] + m.s[1:], m.e, m.c[1:], m.d),
+    'str': lambda m: ([str(m.s[0])] + m.s[1:], m.e, m.c[1:], m.d),
 }
 
 
@@ -114,6 +119,8 @@ if __name__ == '__main__':
             ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['ap'],
             ['dum'],
             ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['rap'],
+            ['read'], ['write'],
+            ['ldc', "number> "], ['write'], ['read'], ['toi'], ['str'], ['write'],
             ['stop']]
     m = Machine()
     m.c = code
