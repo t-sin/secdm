@@ -1,6 +1,6 @@
-# secd.py
+# secdm
 
-Toy implementation of LispKit Lisp and SECD machine
+SECD machine toys.
 
 ## References
 
@@ -11,4 +11,4 @@ I references this paper:
 
 ## License
 
-This program *secd.py* is licensed under the GNU General Public License Version 3. See [COPYING](COPYING) for details.
+This program *secdm* is licensed under the GNU General Public License Version 3. See [COPYING](COPYING) for details.
