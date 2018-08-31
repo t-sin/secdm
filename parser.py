@@ -32,6 +32,14 @@ class SexpParser(object):
                 self.stream.read()
                 ch = self.stream.peek()
 
+            if ch == '(':
+                self.stream.read()
+                result = []
+            if ch == ')':
+                self.stream.read()
+                self.result.append(result)
+                ch = None
+
             if ch is None:
                 return (self.result, self.stream)
 
@@ -44,7 +52,10 @@ class SexpParser(object):
                     _str_result += self.stream.read()
                     ch = self.stream.peek()
 
-                result = _str_result
+                if type(result) is list:
+                    result.append(_str_result)
+                else:
+                    result = _str_result
 
             elif ch in '0123456789':
                 _int_result = ''
@@ -54,24 +65,23 @@ class SexpParser(object):
                     _int_result += self.stream.read()
                     ch = self.stream.peek()
 
-                result = None if len(_int_result) == 0 else int(_int_result)
-
-            elif ch == '(':
-                self.stream.read()
-                ch = self.stream.peek()
-                while ch != ')':
-                    pass
+                if type(result) is list:
+                    result.append(None if len(_int_result) == 0 else int(_int_result))
+                else:
+                    result = None if len(_int_result) == 0 else int(_int_result)
 
             else:
                 ch = self.stream.peek()
-                print(ch)
                 _sym_result = ''
 
-                while ch is not None and ch != ' ':
+                while ch is not None and ch not in ') ':
                     _sym_result += self.stream.read()
                     ch = self.stream.peek()
 
-                result = _sym_result
+                if type(result) is list:
+                    result.append(_sym_result)
+                else:
+                    result = _sym_result
 
 
             if self.result is None:
@@ -85,7 +95,7 @@ class SexpParser(object):
 
 
 if __name__ == '__main__':
-    s = Stream('   abcd')
+    s = Stream('   (a)')
     p = SexpParser(s)
     print(p.parse())
     print(s.buffer[s.head:])
