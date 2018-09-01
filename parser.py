@@ -17,85 +17,133 @@ class Stream(object):
             self.head += 1
             return ch
 
+class ParseState(object):
+    def __init__(self):
+        self.node = 'atom_start'
+        self.stack = []
+        self.buffer = None
+
 class SexpParser(object):
     def __init__(self, stream):
-        self.result = None
         self.stream = stream
+        self.state = ParseState()
+        self.result = []
 
-    def parse(self):
+    def parse_str(self):
+        self.state.node = 'str_start'
+        self.state.buffer = ''
 
         while True:
             ch = self.stream.peek()
+            if ch is None:
+                return None
+
+            if ch == ')':
+                if self.state.stack != []:
+                    result = self.state.buffer
+                    self.state.buffer = None
+                    self.state.node = 'list_start'
+                    return result
+                else:
+                    raise Exception('Illegal ")"')
+
+            if ch == '"':
+                self.stream.read()
+                result = self.state.buffer
+                self.state.buffer = None
+                self.state.node = 'atom_start'
+                return result
+
+            self.state.buffer += self.stream.read()
+
+    def parse_int(self):
+        self.state.node = 'int_start'
+        self.state.buffer = ''
+
+        while True:
+            ch = self.stream.peek()
+            if ch is None or ch in ' \n':
+                result = int(self.state.buffer)
+                self.state.buffer = None
+                self.state.node = 'atom_start'
+                return result
+
+            self.state.buffer += self.stream.read()
+
+    def parse_sym(self):
+        self.state.node = 'sym_start'
+        self.state.buffer = ''
+
+        while True:
+            ch = self.stream.peek()
+            if ch is None or ch in ' \n':
+                result = self.state.buffer
+                self.state.buffer = None
+                self.state.node = 'atom_start'
+                return result
+
+            self.state.buffer += self.stream.read()
+
+    def append_result(self, result):
+        stk = self.result
+        depth = 1
+        while len(stk) > 0 and type(stk[-1]) is list:
+            print('Depth: {}, stack: {}'.format(depth, repr(stk)))
+            stk = stk[-1]
+            depth += 1
+
+        print('after stack: {}'.format(repr(stk)))
+        if depth == len(self.state.stack):
+             stk.append(result)
+        elif depth < len(self.state.stack):
+             for d in range(0, len(self.state.stack) - depth):
+                 stk.append([])
+                 stk = stk[-1]
+             else:
+                 stk.append(result)
+
+    def parse(self):
+        while True:
+            print(self.state.stack)
+            ch = self.stream.peek()
             result = None
 
-            while ch == ' ':
+            # skips whitespaces
+            while ch is not None and ch in ' \n':
                 self.stream.read()
                 ch = self.stream.peek()
 
-            if ch == '(':
-                self.stream.read()
-                result = []
-            if ch == ')':
-                self.stream.read()
-                self.result.append(result)
-                ch = None
-
+            # end of stream
             if ch is None:
-                return (self.result, self.stream)
-
+                if self.state.stack == []:
+                    self.state.node = 'end'
+                return (self.result, self.state)
+            elif ch == '(':
+                self.stream.read()
+                self.state.node = 'list_start'
+                self.state.stack = ['list'] + self.state.stack
+                continue
+            elif ch == ')':
+                self.stream.read()
+                self.state.node = 'atom_start'
+                self.state.stack = self.state.stack[1:]
             elif ch == '"':
                 self.stream.read()
-                ch = self.stream.peek()
-                _str_result = ''
-
-                while ch is not None and ch != '"':
-                    _str_result += self.stream.read()
-                    ch = self.stream.peek()
-
-                if type(result) is list:
-                    result.append(_str_result)
-                else:
-                    result = _str_result
-
+                result = self.parse_str()
             elif ch in '0123456789':
-                _int_result = ''
-                ch = self.stream.peek()
-
-                while ch is not None and ch in '0123456789':
-                    _int_result += self.stream.read()
-                    ch = self.stream.peek()
-
-                if type(result) is list:
-                    result.append(None if len(_int_result) == 0 else int(_int_result))
-                else:
-                    result = None if len(_int_result) == 0 else int(_int_result)
-
+                result = self.parse_int()
             else:
-                ch = self.stream.peek()
-                _sym_result = ''
-
-                while ch is not None and ch not in ') ':
-                    _sym_result += self.stream.read()
-                    ch = self.stream.peek()
-
-                if type(result) is list:
-                    result.append(_sym_result)
-                else:
-                    result = _sym_result
+                result = self.parse_sym()
 
 
-            if self.result is None:
-                self.result = result
-
-            elif type(self.result) is list:
-                self.result.append(result)
-
+            print(repr(result))
+            if result is None:
+                return (None, self.state)
             else:
-                return (self.result, self.stream)
+                self.append_result(result)
 
 
 if __name__ == '__main__':
-    s = Stream('   (a)')
+    s = Stream(input('> '))
     p = SexpParser(s)
     print(p.parse())
-    print(s.buffer[s.head:])
