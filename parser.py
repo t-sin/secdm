@@ -19,7 +19,7 @@ class Stream(object):
 
 class ParseState(object):
     def __init__(self):
-        self.node = 'atom_start'
+        self.node = 'sexp'
         self.stack = []
         self.buffer = None
 
@@ -30,7 +30,7 @@ class SexpParser(object):
         self.result = []
 
     def parse_str(self):
-        self.state.node = 'str_start'
+        self.state.node = 'str'
         self.state.buffer = ''
 
         while True:
@@ -38,26 +38,16 @@ class SexpParser(object):
             if ch is None:
                 return None
 
-            if ch == ')':
-                if self.state.stack != []:
-                    result = self.state.buffer
-                    self.state.buffer = None
-                    self.state.node = 'list_start'
-                    return result
-                else:
-                    raise Exception('Illegal ")"')
-
             if ch == '"':
                 self.stream.read()
                 result = self.state.buffer
                 self.state.buffer = None
-                self.state.node = 'atom_start'
                 return result
 
             self.state.buffer += self.stream.read()
 
     def parse_int(self):
-        self.state.node = 'int_start'
+        self.state.node = 'int'
         self.state.buffer = ''
 
         while True:
@@ -65,13 +55,13 @@ class SexpParser(object):
             if ch is None or ch in ' \n':
                 result = int(self.state.buffer)
                 self.state.buffer = None
-                self.state.node = 'atom_start'
+                self.state.node = 'sexp'
                 return result
 
             self.state.buffer += self.stream.read()
 
     def parse_sym(self):
-        self.state.node = 'sym_start'
+        self.state.node = 'sym'
         self.state.buffer = ''
 
         while True:
@@ -79,7 +69,7 @@ class SexpParser(object):
             if ch is None or ch in ' \n':
                 result = self.state.buffer
                 self.state.buffer = None
-                self.state.node = 'atom_start'
+                self.state.node = 'sexp'
                 return result
 
             self.state.buffer += self.stream.read()
@@ -101,6 +91,12 @@ class SexpParser(object):
                  stk = stk[-1]
              else:
                  stk.append(result)
+        elif depth > len(self.state.stack):
+            stk = self.result
+            for d in range(0, depth - len(self.state.stack)):
+                stk = stk[-1]
+            else:
+                stk.append(result)
 
     def parse(self):
         while True:
@@ -113,6 +109,8 @@ class SexpParser(object):
                 self.stream.read()
                 ch = self.stream.peek()
 
+            print('ch: {}, node: {}'.format(ch, self.state.node))
+
             # end of stream
             if ch is None:
                 if self.state.stack == []:
@@ -120,12 +118,16 @@ class SexpParser(object):
                 return (self.result, self.state)
             elif ch == '(':
                 self.stream.read()
-                self.state.node = 'list_start'
-                self.state.stack = ['list'] + self.state.stack
+                self.state.stack = [self.state.node] + self.state.stack
+                self.state.node = 'list'
+
                 continue
-            elif ch == ')':
+            elif self.state.node == 'list' and ch == ')':
                 self.stream.read()
-                self.state.node = 'atom_start'
+                if self.state.stack == []:
+                    self.state.node = 'sexp'
+                else:
+                    self.state.node = self.state.stack[0]
                 self.state.stack = self.state.stack[1:]
             elif ch == '"':
                 self.stream.read()
