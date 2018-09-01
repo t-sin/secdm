@@ -1,3 +1,6 @@
+'''A parser for S-expressions of SECD Machine code
+'''
+
 class Stream(object):
     def __init__(self, s):
         self.buffer = s
@@ -17,140 +20,137 @@ class Stream(object):
             self.head += 1
             return ch
 
-class ParseState(object):
+
+def transition_sexp(s, ch):
+    if ch is None:
+        return 'end'
+    elif ch in ' \n':
+        return 'sexp'
+    elif ch == '(':
+        s.stack = [[]] + s.stack
+        return 'list'
+    elif ch == '"':
+        s.tmps = ''
+        return 'str'
+    elif ch.isdigit():
+        s.tmps = ch
+        return 'int'
+    else:
+        s.tmps = ch
+        return 'sym'
+
+def transition_str(s, ch):
+    if ch is None:
+        return None
+    elif ch != '"':
+        s.tmps += ch
+        return 'str'
+    else:
+        if s.stack == []:
+            s.ast = s.tmps
+            return 'sexp'
+        else:
+            s.stack[0].append(s.tmps)
+            return 'list'
+
+def transition_int(s, ch):
+    if ch is None:
+        if s.stack == []:
+            s.ast = s.tmps
+            return 'sexp'
+        else:
+            return None
+    elif ch.isdigit():
+        s.tmps += ch
+        return 'int'
+    else:
+        if s.stack == []:
+            s.ast = s.tmps
+            return 'sexp'
+        else:
+            s.stack[0].append(s.tmps)
+            return 'list'
+
+def transition_sym(s, ch):
+    if ch is None:
+        if s.stack == []:
+            s.ast = s.tmps
+            return 'sexp'
+        else:
+            return None
+    elif ch.isalpha():
+        s.tmps += ch
+        return 'sym'
+    else:
+        if s.stack == []:
+            s.ast = s.tmps
+            return 'sexp'
+        else:
+            s.stack[0].append(s.tmps)
+            return 'list'
+
+def transition_list(s, ch):
+    if ch is None:
+        s.ast.append(s.stack[0])
+        return None
+    elif ch in ' \n':
+        return 'list'
+    elif ch == '(':
+        s.stack = [[]] + s.stack
+        return 'list'
+    elif ch == ')':
+        s.ast.append(s.stack[0])
+        s.stack = s.stack[1:]
+        return 'sexp'
+    elif ch == '"':
+        s.tmps = ''
+        return 'str'
+    elif ch.isdigit():
+        s.tmps = ch
+        return 'int'
+    else:
+        s.tmps = ch
+        return 'sym'
+
+automaton = {
+    'sexp': (transition_sexp, ['end', 'sexp', 'str', 'int', 'sym', 'list']),
+    'str': (transition_str, ['str', 'sexp', 'list']),
+    'int': (transition_int, ['int', 'sexp', 'list']),
+    'sym': (transition_sym, ['sym', 'sexp', 'list']),
+    'list': (transition_list, ['sexp', 'str', 'int', 'sym', 'list']),
+    'end': (None, None),
+}
+
+class MachineCodeParser(object):
     def __init__(self):
         self.node = 'sexp'
         self.stack = []
-        self.buffer = None
+        self.tmps = ''
+        self.ast = None
 
-class SexpParser(object):
-    def __init__(self, stream):
-        self.stream = stream
-        self.state = ParseState()
-        self.result = []
+    def __repr__(self):
+        return '(node, stack) = ({}, {})'.format(self.node, self.stack)
 
-    def parse_str(self):
-        self.state.node = 'str'
-        self.state.buffer = ''
+    def set_state(self, node, stack):
+        self.node = node
+        self.stack = stack
 
+    def parse(self, stream):
         while True:
-            ch = self.stream.peek()
-            if ch is None:
-                return None
+            ch = stream.read()
+            print('ch: {}, {}'.format(repr(ch), repr(self)))
+            print('ast: {}'.format(repr(self.ast)))
+            edge = automaton[self.node]
+            self.node = edge[0](self, ch)
 
-            if ch == '"':
-                self.stream.read()
-                result = self.state.buffer
-                self.state.buffer = None
-                return result
-
-            self.state.buffer += self.stream.read()
-
-    def parse_int(self):
-        self.state.node = 'int'
-        self.state.buffer = ''
-
-        while True:
-            ch = self.stream.peek()
-            if ch is None or ch in ' \n':
-                result = int(self.state.buffer)
-                self.state.buffer = None
-                self.state.node = 'sexp'
-                return result
-
-            self.state.buffer += self.stream.read()
-
-    def parse_sym(self):
-        self.state.node = 'sym'
-        self.state.buffer = ''
-
-        while True:
-            ch = self.stream.peek()
-            if ch is None or ch in ' \n':
-                result = self.state.buffer
-                self.state.buffer = None
-                self.state.node = 'sexp'
-                return result
-
-            self.state.buffer += self.stream.read()
-
-    def append_result(self, result):
-        print('---------------\nres: {}, stack: {}'.format(repr(result), self.state.stack))
-        deepest_tail = self.result
-        stack_len = len(self.state.stack)
-        depth = 1
-        while type(deepest_tail) is list and len(deepest_tail) > 0 and type(deepest_tail[-1]) is list:
-            deepest_tail = deepest_tail[-1]
-            depth += 1
-            print('Depth: {}, deepest: {}'.format(depth, repr(deepest_tail)))
-
-        if depth == stack_len:
-             print('depth == len(stack)')
-             deepest_tail.append(result)
-
-        elif depth < stack_len:
-            print('depth < len(stack)')
-            for d in range(0, stack_len - depth):
-                deepest_tail.append([])
-                deepest_tail = deepest_tail[-1]
-            else:
-                deepest_tail.append(result)
-
-        elif depth > stack_len:
-            print('depth > len(stack)')
-            target = self.result
-            print('self.result = {}'.format(target))
-            for d in range(0, depth - stack_len):
-                target = target[-1]
-            else:
-                print('pop and target: {}'.format(target))
-                target.append(result)
-
-    def parse(self):
-        while True:
-            ch = self.stream.peek()
-            result = None
-
-            # skips whitespaces
-            while ch is not None and ch in ' \n':
-                self.stream.read()
-                ch = self.stream.peek()
-
-            # end of stream
-            if ch is None:
-                if self.state.stack == []:
-                    self.state.node = 'end'
-                return (self.result, self.state)
-
-            elif ch == '(':
-                self.stream.read()
-                self.state.stack = [self.state.node] + self.state.stack
-                self.state.node = 'list'
-                continue
-
-            elif len(self.state.stack) > 0 and ch == ')':
-                self.stream.read()
-                self.state.node = self.state.stack[0]
-                self.state.stack = self.state.stack[1:]
-                continue
-
-            elif ch == '"':
-                self.stream.read()
-                result = self.parse_str()
-
-            elif ch in '0123456789':
-                result = self.parse_int()
-
-            else:
-                result = self.parse_sym()
-
-            if result is None:
-                return (None, self.state)
-            else:
-                self.append_result(result)
-
+            if self.node == 'end':
+                print('accepted!')
+                return self.ast
+            elif self.node == None:
+                print('rejected...')
+                return self.ast
 
 if __name__ == '__main__':
     s = Stream(input('> '))
-    p = SexpParser(s)
-    print(p.parse())
+    p = MachineCodeParser()
+    p.parse(s)
