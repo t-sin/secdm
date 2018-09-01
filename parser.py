@@ -75,32 +75,39 @@ class SexpParser(object):
             self.state.buffer += self.stream.read()
 
     def append_result(self, result):
-        stk = self.result
+        print('---------------\nres: {}, stack: {}'.format(repr(result), self.state.stack))
+        deepest_tail = self.result
+        stack_len = len(self.state.stack)
         depth = 1
-        while len(stk) > 0 and type(stk[-1]) is list:
-            print('Depth: {}, stack: {}'.format(depth, repr(stk)))
-            stk = stk[-1]
+        while type(deepest_tail) is list and len(deepest_tail) > 0 and type(deepest_tail[-1]) is list:
+            deepest_tail = deepest_tail[-1]
             depth += 1
+            print('Depth: {}, deepest: {}'.format(depth, repr(deepest_tail)))
 
-        print('after stack: {}'.format(repr(stk)))
-        if depth == len(self.state.stack):
-             stk.append(result)
-        elif depth < len(self.state.stack):
-             for d in range(0, len(self.state.stack) - depth):
-                 stk.append([])
-                 stk = stk[-1]
-             else:
-                 stk.append(result)
-        elif depth > len(self.state.stack):
-            stk = self.result
-            for d in range(0, depth - len(self.state.stack)):
-                stk = stk[-1]
+        if depth == stack_len:
+             print('depth == len(stack)')
+             deepest_tail.append(result)
+
+        elif depth < stack_len:
+            print('depth < len(stack)')
+            for d in range(0, stack_len - depth):
+                deepest_tail.append([])
+                deepest_tail = deepest_tail[-1]
             else:
-                stk.append(result)
+                deepest_tail.append(result)
+
+        elif depth > stack_len:
+            print('depth > len(stack)')
+            target = self.result
+            print('self.result = {}'.format(target))
+            for d in range(0, depth - stack_len):
+                target = target[-1]
+            else:
+                print('pop and target: {}'.format(target))
+                target.append(result)
 
     def parse(self):
         while True:
-            print(self.state.stack)
             ch = self.stream.peek()
             result = None
 
@@ -109,36 +116,34 @@ class SexpParser(object):
                 self.stream.read()
                 ch = self.stream.peek()
 
-            print('ch: {}, node: {}'.format(ch, self.state.node))
-
             # end of stream
             if ch is None:
                 if self.state.stack == []:
                     self.state.node = 'end'
                 return (self.result, self.state)
+
             elif ch == '(':
                 self.stream.read()
                 self.state.stack = [self.state.node] + self.state.stack
                 self.state.node = 'list'
-
                 continue
-            elif self.state.node == 'list' and ch == ')':
+
+            elif len(self.state.stack) > 0 and ch == ')':
                 self.stream.read()
-                if self.state.stack == []:
-                    self.state.node = 'sexp'
-                else:
-                    self.state.node = self.state.stack[0]
+                self.state.node = self.state.stack[0]
                 self.state.stack = self.state.stack[1:]
+                continue
+
             elif ch == '"':
                 self.stream.read()
                 result = self.parse_str()
+
             elif ch in '0123456789':
                 result = self.parse_int()
+
             else:
                 result = self.parse_sym()
 
-
-            print(repr(result))
             if result is None:
                 return (None, self.state)
             else:
