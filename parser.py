@@ -135,7 +135,7 @@ class MachineCodeParser(object):
         self.node = node
         self.stack = stack
 
-    def parse(self, stream):
+    def parse_one(self, stream):
         while True:
             ch = stream.read()
             print('ch: {}, {}'.format(repr(ch), repr(self)))
@@ -153,4 +153,4 @@ class MachineCodeParser(object):
 if __name__ == '__main__':
     s = Stream(input('> '))
     p = MachineCodeParser()
-    p.parse(s)
+    p.parse_one(s)
