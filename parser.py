@@ -113,12 +113,12 @@ def transition_list(s, ch):
         return 'sym'
 
 automaton = {
-    'sexp': (transition_sexp, ['end', 'sexp', 'str', 'int', 'sym', 'list']),
-    'str': (transition_str, ['str', 'sexp', 'list']),
-    'int': (transition_int, ['int', 'sexp', 'list']),
-    'sym': (transition_sym, ['sym', 'sexp', 'list']),
-    'list': (transition_list, ['sexp', 'str', 'int', 'sym', 'list']),
-    'end': (None, None),
+    'sexp': transition_sexp,
+    'str': transition_str,
+    'int': transition_int,
+    'sym': transition_sym,
+    'list': transition_list,
+    'end': None,
 }
 
 class MachineCodeParser(object):
@@ -140,8 +140,8 @@ class MachineCodeParser(object):
             ch = stream.read()
             print('ch: {}, {}'.format(repr(ch), repr(self)))
             print('ast: {}'.format(repr(self.ast)))
-            edge = automaton[self.node]
-            self.node = edge[0](self, ch)
+            next = automaton[self.node]
+            self.node = next(self, ch)
 
             if self.node == 'end':
                 print('accepted!')
