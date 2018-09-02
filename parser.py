@@ -56,7 +56,7 @@ def transition_str(s, ch):
 def transition_int(s, ch):
     if ch is None:
         if s.stack == []:
-            s.ast = s.tmps
+            s.ast = int(s.tmps)
             return 'sexp'
         else:
             return None
@@ -65,10 +65,10 @@ def transition_int(s, ch):
         return 'int'
     else:
         if s.stack == []:
-            s.ast = s.tmps
+            s.ast = int(s.tmps)
             return 'sexp'
         else:
-            s.stack[0].append(s.tmps)
+            s.stack[0].append(int(s.tmps))
             return 'list'
 
 def transition_sym(s, ch):
