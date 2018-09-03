@@ -145,10 +145,10 @@ class MachineCodeParser(object):
 
             if self.node == 'end':
                 print('accepted!')
-                return self.ast
+                return (True, self.ast)
             elif self.node == None:
                 print('rejected...')
-                return self.ast
+                return (False, self.ast)
 
 if __name__ == '__main__':
     s = Stream(input('> '))
