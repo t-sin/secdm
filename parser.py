@@ -60,16 +60,25 @@ def transition_int(s, ch):
             return 'sexp'
         else:
             return None
-    elif ch.isdigit():
-        s.tmps += ch
-        return 'int'
-    else:
+    elif ch in ' \n':
         if s.stack == []:
             s.ast = int(s.tmps)
             return 'sexp'
         else:
             s.stack[0].append(int(s.tmps))
             return 'list'
+    elif ch == ')':
+        if s.stack == []:
+            s.stack[0].append(int(s.tmps))
+            return 'sexp'
+        else:
+            s.stack = s.stack[1:]
+            return 'list'
+    elif ch.isdigit():
+        s.tmps += ch
+        return 'int'
+    else:
+        return None
 
 def transition_sym(s, ch):
     if ch is None:
@@ -78,16 +87,25 @@ def transition_sym(s, ch):
             return 'sexp'
         else:
             return None
-    elif ch.isalpha():
-        s.tmps += ch
-        return 'sym'
-    else:
+    elif ch in ' \n':
         if s.stack == []:
             s.ast = s.tmps
             return 'sexp'
         else:
             s.stack[0].append(s.tmps)
             return 'list'
+    elif ch == ')':
+        if s.stack == []:
+            s.stack[0].append(s.tmps)
+            return 'sexp'
+        else:
+            s.stack = s.stack[1:]
+            return 'list'
+    elif ch.isalpha():
+        s.tmps += ch
+        return 'sym'
+    else:
+        None
 
 def transition_list(s, ch):
     if ch is None:
