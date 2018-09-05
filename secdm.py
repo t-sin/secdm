@@ -5,7 +5,15 @@ from vm import Machine
 
 usage = '''SECD machine toys
 
-usage: secdm.py [-hd] [PROGRAM]
+USAGE: secdm.py [-hd] [PROGRAM]
+
+secdm.py is a machine code interpreter for Landin's SECD Machine. SECD Machine has
+only 21 instructions with some my extension about I/O.
+Running secdm.py without PROGRAM, it enters REPL mode.
+
+OPTIONS:
+        -d --debug   Print state of virtual machine on each steps.
+        -h --help    Print this message.
 '''
 
 def secdm_repl(debug=False):
