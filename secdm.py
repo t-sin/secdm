@@ -1,6 +1,6 @@
 import sys
 
-from parser import Stream, MachineCodeReader
+from parser import Stream, MachineCodeReader, EOFError
 from vm import Machine
 
 usage = '''SECD machine toys
@@ -18,7 +18,14 @@ def secdm_repl(debug=False):
         reader = MachineCodeReader(stream)
 
         while True:
-            code = reader.read_one()
+            try:
+                code = reader.read_one()
+            except EOFError:
+                print(repr(stream.buffer))
+                line = input('.. ')
+                reader.append_input(line)
+                continue
+
             if code is None:
                 break
             code_list.append(code)
