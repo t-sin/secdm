@@ -1,6 +1,8 @@
 '''A parser for S-expressions of SECD Machine code
 '''
 
+from io import StringIO
+
 class Stream(object):
     def __init__(self, s):
         self.buffer = s
@@ -20,155 +22,98 @@ class Stream(object):
             self.head += 1
             return ch
 
+class ParseError(Exception):
+    pass
 
-def transition_sexp(s, ch):
-    if ch is None:
-        return 'end'
-    elif ch in ' \n':
-        return 'sexp'
-    elif ch == '(':
-        s.stack = [[]] + s.stack
-        return 'list'
-    elif ch == '"':
-        s.tmps = ''
-        return 'str'
-    elif ch.isdigit():
-        s.tmps = ch
-        return 'int'
-    else:
-        s.tmps = ch
-        return 'sym'
+class EOFError(ParseError):
+    pass
 
-def transition_str(s, ch):
-    if ch is None:
-        return None
-    elif ch != '"':
-        s.tmps += ch
-        return 'str'
-    else:
-        if s.stack == []:
-            s.ast = s.tmps
-            return 'sexp'
-        else:
-            s.stack[0].append(s.tmps)
-            return 'list'
+class MachineCodeReader(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.read_buffer = StringIO()
 
-def transition_int(s, ch):
-    if ch is None:
-        if s.stack == []:
-            s.ast = int(s.tmps)
-            return 'sexp'
-        else:
-            return None
-    elif ch in ' \n':
-        if s.stack == []:
-            s.ast = int(s.tmps)
-            return 'sexp'
-        else:
-            s.stack[0].append(int(s.tmps))
-            return 'list'
-    elif ch == ')':
-        if s.stack == []:
-            s.stack[0].append(int(s.tmps))
-            return 'sexp'
-        else:
-            s.stack = s.stack[1:]
-            return 'list'
-    elif ch.isdigit():
-        s.tmps += ch
-        return 'int'
-    else:
-        return None
+    def _read_ch(self):
+        ch = self.stream.read()
+        self.read_buffer.write(ch)
+        return ch
 
-def transition_sym(s, ch):
-    if ch is None:
-        if s.stack == []:
-            s.ast = s.tmps
-            return 'sexp'
-        else:
-            return None
-    elif ch in ' \n':
-        if s.stack == []:
-            s.ast = s.tmps
-            return 'sexp'
-        else:
-            s.stack[0].append(s.tmps)
-            return 'list'
-    elif ch == ')':
-        if s.stack == []:
-            s.stack[0].append(s.tmps)
-            return 'sexp'
-        else:
-            s.stack = s.stack[1:]
-            return 'list'
-    elif ch.isalpha():
-        s.tmps += ch
-        return 'sym'
-    else:
-        None
-
-def transition_list(s, ch):
-    if ch is None:
-        s.ast.append(s.stack[0])
-        return None
-    elif ch in ' \n':
-        return 'list'
-    elif ch == '(':
-        s.stack = [[]] + s.stack
-        return 'list'
-    elif ch == ')':
-        s.ast.append(s.stack[0])
-        s.stack = s.stack[1:]
-        return 'sexp'
-    elif ch == '"':
-        s.tmps = ''
-        return 'str'
-    elif ch.isdigit():
-        s.tmps = ch
-        return 'int'
-    else:
-        s.tmps = ch
-        return 'sym'
-
-automaton = {
-    'sexp': transition_sexp,
-    'str': transition_str,
-    'int': transition_int,
-    'sym': transition_sym,
-    'list': transition_list,
-    'end': None,
-}
-
-class MachineCodeParser(object):
-    def __init__(self):
-        self.node = 'sexp'
-        self.stack = []
-        self.tmps = ''
-        self.ast = None
-
-    def __repr__(self):
-        return '(node, stack) = ({}, {})'.format(self.node, self.stack)
-
-    def set_state(self, node, stack):
-        self.node = node
-        self.stack = stack
-
-    def parse_one(self, stream):
+    def _skip_whitespace(self):
         while True:
-            ch = stream.read()
-            print('ch: {}, {}'.format(repr(ch), repr(self)))
-            print('ast: {}'.format(repr(self.ast)))
-            next = automaton[self.node]
-            self.node = next(self, ch)
+            ch = self.stream.peek()
+            if ch is None:
+                return None
+            elif ch in ' \n':
+                self._read_ch()
+            else:
+                break
 
-            if self.node == 'end':
-                print('accepted!')
-                return (True, self.ast)
-            elif self.node == None:
-                print('rejected...')
-                return (False, self.ast)
+    def read_str(self):
+        buf = StringIO()
+        while True:
+            ch = self.stream.peek()
+            if ch is None:
+                raise EOFError()
+            elif ch == '"':
+                self._read_ch()
+                return buf.getvalue()
+            else:
+                buf.write(self._read_ch())
+
+    def read_int(self):
+        buf = StringIO()
+        while True:
+            ch = self.stream.peek()
+            if ch is None:
+                return int(buf.getvalue())
+            elif ch.isdigit():
+                buf.write(self._read_ch())
+            else:
+                return int(buf.getvalue())
+
+    def read_sym(self):
+        buf = StringIO()
+        while True:
+            ch = self.stream.peek()
+            if ch is None:
+                return buf.getvalue()
+            elif ch in '"() \n':
+                return buf.getvalue()
+            else:
+                buf.write(self._read_ch())
+
+    def read_list(self):
+        lis = []
+        while True:
+            self._skip_whitespace()
+            ch = self.stream.peek()
+            if ch is None:
+                raise EOFError()
+            elif ch == ')':
+                self._read_ch()
+                return lis
+            else:
+                lis.append(self.read_one())
+
+    def read_one(self):
+        self._skip_whitespace()
+        ch = self.stream.peek()
+
+        if ch is None:
+            return None
+        elif ch == '(':
+            self._read_ch()
+            return self.read_list()
+        elif ch == '"':
+            self._read_ch()
+            return self.read_str()
+        elif ch.isdigit():
+            return self.read_int()
+        else:
+            return self.read_sym()
 
 if __name__ == '__main__':
     s = Stream(input('> '))
-    p = MachineCodeParser()
-    p.parse_one(s)
+    p = MachineCodeReader(s)
+    print(repr(p.read_one()))
+    print(repr(p.read_buffer.getvalue()))
