@@ -33,6 +33,10 @@ class MachineCodeReader(object):
         self.stream = stream
         self.read_buffer = StringIO()
 
+    def append_input(self, new_str):
+        str_read = self.read_buffer.getvalue()
+        self.stream = Stream(str_read + new_str)
+
     def _read_ch(self):
         ch = self.stream.read()
         self.read_buffer.write(ch)

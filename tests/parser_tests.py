@@ -75,3 +75,28 @@ class TestParser(unittest.TestCase):
                          ['a', 'b', ['c', 'd', ['e'], 'f']])
         self.assertEqual(parse_str('(a b (c d (e f) g))'),
                          ['a', 'b', ['c', 'd', ['e', 'f'], 'g']])
+
+    def test_incomplete_input(self):
+        stream = Stream('(')
+        reader = MachineCodeReader(stream)
+        with self.assertRaises(EOFError):
+            reader.read_one()
+        self.assertEqual(reader.read_buffer.getvalue(), '(')
+
+        stream = Stream('(a b')
+        reader = MachineCodeReader(stream)
+        with self.assertRaises(EOFError):
+            reader.read_one()
+        self.assertEqual(reader.read_buffer.getvalue(), '(a b')
+
+        reader.append_input(')')
+        self.assertEqual(reader.read_one(), ['a', 'b'])
+
+        stream = Stream('"a b')
+        reader = MachineCodeReader(stream)
+        with self.assertRaises(EOFError):
+            reader.read_one()
+        self.assertEqual(reader.read_buffer.getvalue(), '"a b')
+
+        reader.append_input('"')
+        self.assertEqual(reader.read_one(), 'a b')
