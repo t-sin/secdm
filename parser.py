@@ -115,9 +115,3 @@ class MachineCodeReader(object):
             return self.read_int()
         else:
             return self.read_sym()
-
-if __name__ == '__main__':
-    s = Stream(input('> '))
-    p = MachineCodeReader(s)
-    print(repr(p.read_one()))
-    print(repr(p.read_buffer.getvalue()))
