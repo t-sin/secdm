@@ -9,6 +9,7 @@ USAGE: secdm.py [-hd] [PROGRAM]
 
 secdm.py is a machine code interpreter for Landin's SECD Machine. SECD Machine has
 only 21 instructions with some my extension about I/O.
+
 Running secdm.py without PROGRAM, it enters REPL mode.
 
 OPTIONS:
