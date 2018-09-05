@@ -30,9 +30,8 @@ def secdm_repl(debug=False):
             try:
                 code = reader.read_one()
             except EOFError:
-                print(repr(stream.buffer))
                 line = input('.. ')
-                reader.append_input(line)
+                reader.append_input(' ' + line)
                 continue
 
             if code is None:

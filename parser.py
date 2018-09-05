@@ -53,6 +53,15 @@ class MachineCodeReader(object):
             else:
                 break
 
+    def skip_comment(self):
+        while True:
+            ch = self.stream.peek()
+            if ch is None or ch == '\n':
+                self.stream.read()
+                return
+            else:
+                self.stream.read()
+
     def read_str(self):
         buf = StringIO()
         while True:
@@ -82,7 +91,7 @@ class MachineCodeReader(object):
             ch = self.stream.peek()
             if ch is None:
                 return buf.getvalue()
-            elif ch in '"() \n':
+            elif ch in '"() \n;':
                 return buf.getvalue()
             else:
                 buf.write(self._read_ch())
@@ -91,6 +100,7 @@ class MachineCodeReader(object):
         lis = []
         while True:
             self._skip_whitespace()
+
             ch = self.stream.peek()
             if ch is None:
                 raise EOFError()
@@ -104,7 +114,10 @@ class MachineCodeReader(object):
         self._skip_whitespace()
         ch = self.stream.peek()
 
-        if ch is None:
+        if ch is not None and ch == ';':
+            self.skip_comment()
+            return self.read_one()
+        elif ch is None:
             return None
         elif ch == '(':
             self._read_ch()
