@@ -28,7 +28,7 @@ class Func(object):
 #
 # they take few args; secd machine and others...
 OPCODE = {
-    'ld': lambda m, n: ([e.n] + m.s, m.e, m.c[1:], m.d),
+    'ld': lambda m, n: ([m.e[n]] + m.s, m.e, m.c[1:], m.d),
     'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
     'ldf': lambda m, c: ([Func(m.c[0][1], [m.e])] + m.s, m.e, m.c[1:], m.d),
     'ap': lambda m: ([], [m.s[1]] + m.e, m.s[0].code, [(m.s[2:], m.e, m.c[1:])] + m.d),
