@@ -76,6 +76,9 @@ class MachineCodeReader(object):
 
     def read_int(self):
         buf = StringIO()
+        ch = self.stream.peek()
+        if ch == '-':
+            buf.write(self._read_ch())
         while True:
             ch = self.stream.peek()
             if ch is None:
@@ -125,7 +128,7 @@ class MachineCodeReader(object):
         elif ch == '"':
             self._read_ch()
             return self.read_str()
-        elif ch.isdigit():
+        elif ch == '-' or ch.isdigit():
             return self.read_int()
         else:
             return self.read_sym()
