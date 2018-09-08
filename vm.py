@@ -37,7 +37,7 @@ OPCODE = {
     'rap': lambda m: ([], rplaca(m.s[0].env, m.s[1]), m.s[0].code, [(m.s[2:], m.e, m.c[1:])] + m.d),
     'sel': lambda m, ct, cf: (m.s[1:], m.e, ct if m.s[0] else cf, [m.c[1:]] + m.d),
     'join': lambda m: (m.s, m.e, m.d[0], m.d[1:]),
-    'car': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
+    'car': lambda m: ([m.s[0].car] + m.s[1:], m.e, m.c[1:], m.d),
     'cdr': lambda m: ([m.s[0].cdr] + m.s[1:], m.e, m.c[1:], m.d),
     'atom': lambda m: ([type(m.s[0]) is Cons] + m.s[1:], m.e, m.c[1:], m.d),
     'cons': lambda m: ([Cons(m.s[0], m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
