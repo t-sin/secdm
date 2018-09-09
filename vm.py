@@ -22,7 +22,7 @@ class Func(object):
         self.env = env
 
     def __repr__(self):
-        return 'fn<{}, {}>'.format(self.code, self.env)
+        return 'fn<[...], {}>'.format(self.env)
 
 # instructions
 #
