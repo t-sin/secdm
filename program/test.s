@@ -7,7 +7,7 @@
 (ap)
 (dum)
 (ldc "> ")
-(println)
+(print)
 (input)
 (println)
 (stop)
