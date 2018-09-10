@@ -112,18 +112,3 @@ class Machine(object):
         if self._debug_:
             print('Machine stopped.')
             print(self)
-
-
-if __name__ == '__main__':
-    code = [['ldc', 42], ['ldc', 1], ['cons'], ['car'],
-            ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['ap'],
-            ['dum'],
-            ['ldf', [['ldc', 100], ['ldc', 200], ['rtn'], ['stop']]], ['rap'],
-            ['read'], ['write'],
-            ['ldc', "number> "], ['write'], ['read'], ['toi'], ['str'], ['write'],
-            ['stop']]
-    m = Machine()
-    m.c = code
-    m._debug_ = False
-
-    m.run()
