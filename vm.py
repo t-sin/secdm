@@ -39,7 +39,7 @@ OPCODE = {
     'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
 
     # some my extention instruction
-    'nil': lambda m: ([m.nil] + m.s[1:], m.e, m.c[1:], m.d),
+    'nil': lambda m: ([m.nil] + m.s, m.e, m.c[1:], m.d),
     ## I/O
     'input': lambda m: ([String(input(''))] + m.s, m.e, m.c[1:], m.d),
     'print': lambda m: print(m.s[0], end='') or (m.s[1:], m.e, m.c[1:], m.d),
