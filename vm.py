@@ -1,5 +1,8 @@
 #!/usr/bin/ppython
 
+from object import *
+
+
 def rplaca(e, v):
     '''Replace environment stack head with specified value'''
     if e[0] == 'omega':
@@ -7,22 +10,6 @@ def rplaca(e, v):
     else:
         raise Exception('e stack top is not "omega"')
     return e
-
-class Cons(object):
-    def __init__(self, car, cdr):
-        self.car = car
-        self.cdr = cdr
-
-    def __repr__(self):
-        return '({} . {})'.format(self.car, self.cdr)
-
-class Func(object):
-    def __init__(self, code, env):
-        self.code = code
-        self.env = env
-
-    def __repr__(self):
-        return 'fn<[...], {}>'.format(self.env)
 
 # instructions
 #
@@ -93,7 +80,7 @@ class Machine(object):
             print(self)
             print('  OP: {}'.format(op))
 
-        s, e, c, d = OPCODE[op[0]](self, *op[1:])
+        s, e, c, d = OPCODE[op[0].name](self, *op[1:])
         self.s = s
         self.e = e
         self.c = c

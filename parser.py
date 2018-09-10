@@ -3,6 +3,9 @@
 
 from io import StringIO
 
+from object import *
+
+
 class Stream(object):
     def __init__(self, s):
         self.buffer = s
@@ -93,9 +96,9 @@ class MachineCodeReader(object):
         while True:
             ch = self.stream.peek()
             if ch is None:
-                return buf.getvalue()
+                return Symbol(buf.getvalue())
             elif ch in '"() \n;':
-                return buf.getvalue()
+                return Symbol(buf.getvalue())
             else:
                 buf.write(self._read_ch())
 
