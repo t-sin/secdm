@@ -6,7 +6,7 @@
 ;; define the recursive function `rf`: it takes itsself, and call itsself with args; itsself.
 ;; function defined is pushed into stack top.
 ;; function definition copies current envrionment
-(ldf ((ldc "looping...") (write)
+(ldf ((ldc "looping...") (println)
       (ld 0) (ld 0) (ap)
       (rtn)))
 

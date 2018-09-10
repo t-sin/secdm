@@ -9,8 +9,8 @@
 ;; defines the recursive function `rf`:
 ;; this applies `rf` in the cons, when cdr of arg is equals to the limit number `10`.
 (ldf ((ld 0) (cdr) (ldc 10) (eq)
-      (sel ((ldc "stop counting up.") (write) (join))
-           ((ld 0) (cdr) (write)        ; print current counter
+      (sel ((ldc "stop counting up.") (println) (join))
+           ((ld 0) (cdr) (println)        ; print current counter
             (ld 0) (cdr) (ldc 1) (add)  ; increment new number
             (ld 0) (car)                ; take `rf` from cons cel
             (cons)                      ; combine new number and `rf`

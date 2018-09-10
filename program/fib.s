@@ -27,7 +27,7 @@
             (ld 0) (cdr) (car)
             (cons)
             (ld 0) (cdr) (car)
-            (ap) (write)
+            (ap) (println)
             ;; call rec-fn
             (ld 0) (cdr) (cdr) (cdr) (ldc 1) (add)
             (ld 0) (cdr) (cdr) (car)
