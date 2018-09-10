@@ -73,7 +73,7 @@ class MachineCodeReader(object):
                 raise EOFError()
             elif ch == '"':
                 self._read_ch()
-                return buf.getvalue()
+                return String(buf.getvalue())
             else:
                 buf.write(self._read_ch())
 

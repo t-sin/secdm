@@ -15,6 +15,13 @@ class Symbol(Object):
     def __repr__(self):
         return '{}'.format(self.name.upper())
 
+class String(Object):
+    def __init__(self, str):
+        self.str = str
+
+    def __repr__(self):
+        return '{}'.format(self.str)
+
 class Cons(Object):
     def __init__(self, car, cdr):
         self.car = car

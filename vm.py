@@ -40,10 +40,11 @@ OPCODE = {
 
     # some my extention instruction
     'nil': lambda m: ([m.nil] + m.s[1:], m.e, m.c[1:], m.d),
-    'input': lambda m: ([input('')] + m.s, m.e, m.c[1:], m.d),
+    ## I/O
+    'input': lambda m: ([String(input(''))] + m.s, m.e, m.c[1:], m.d),
     'print': lambda m: print(m.s[0], end='') or (m.s[1:], m.e, m.c[1:], m.d),
     'println': lambda m: print(m.s[0]) or (m.s[1:], m.e, m.c[1:], m.d),
-    'toi': lambda m: ([int(m.s[0])] + m.s[1:], m.e, m.c[1:], m.d),
+    'toi': lambda m: ([int(m.s[0].str)] + m.s[1:], m.e, m.c[1:], m.d),
     'str': lambda m: ([str(m.s[0])] + m.s[1:], m.e, m.c[1:], m.d),
 }
 
