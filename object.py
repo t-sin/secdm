@@ -1,10 +1,12 @@
 '''SECD machine object'''
 
 class Object(object):
-    pass
+    def __repr__(self):
+        return '<OBJECT>'
 
 class Nil(Object):
-    pass
+    def __repr__(self):
+        return 'NIL'
 
 class Symbol(Object):
     def __init__(self, name):

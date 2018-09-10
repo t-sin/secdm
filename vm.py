@@ -15,6 +15,7 @@ def rplaca(e, v):
 #
 # they take few args; secd machine and others...
 OPCODE = {
+    # original instruction
     'ld': lambda m, n: ([m.e[n]] + m.s, m.e, m.c[1:], m.d),
     'ldc': lambda m, v: ([v] + m.s, m.e, m.c[1:], m.d),
     'ldf': lambda m, c: ([Func(m.c[0][1], m.e)] + m.s, m.e, m.c[1:], m.d),
@@ -37,6 +38,8 @@ OPCODE = {
     'leq': lambda m: ([(m.s[0] <= m.s[1])] + m.s[2:], m.e, m.c[1:], m.d),
     'stop': lambda m: m._stop() or (m.s, m.e, m.c, m.d),
 
+    # some my extention instruction
+    'nil': lambda m: ([m.nil] + m.s[1:], m.e, m.c[1:], m.d),
     'read': lambda m: ([input('')] + m.s, m.e, m.c[1:], m.d),
     'write': lambda m: print(m.s[0]) or (m.s[1:], m.e, m.c[1:], m.d),
     'toi': lambda m: ([int(m.s[0])] + m.s[1:], m.e, m.c[1:], m.d),
@@ -52,6 +55,8 @@ class Machine(object):
         self.e = []
         self.c = []
         self.d = []
+
+        self.nil = Nil()
 
         self._stop_ = False
         self._debug_ = False
