@@ -2,6 +2,16 @@
 
 SECD machine toys.
 
+*SECD machine* is a abscract machine to implement pure functional programming languages.
+It is introduced for the purpose of mechanically evaluating expressions of Lambda Calculus.
+
+It has four registers, they point each stacks;
+
+- Stack: data stack
+- Environment: values bound by function applying
+- Code: code stack
+- Dump: stack to store temporary data like other stacks
+
 ## How to run
 
 Clone it, 
