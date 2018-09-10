@@ -12,12 +12,24 @@ class Symbol(Object):
     def __init__(self, name):
         self.name = name
 
+    def __eq__(self, obj):
+        if type(obj) is Symbol:
+            return obj.name == self.name
+        else:
+            return False
+
     def __repr__(self):
         return '{}'.format(self.name.upper())
 
 class String(Object):
     def __init__(self, str):
         self.str = str
+
+    def __eq__(self, obj):
+        if type(obj) is String:
+            return obj.str == self.str
+        else:
+            return False
 
     def __repr__(self):
         return '{}'.format(self.str)
