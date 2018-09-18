@@ -14,15 +14,26 @@
 (cons)
 
 ;; whitespace skipper `skip`: ((sp . (skip . (symp . lisp))) . (ch . rest)) -> nil
-(ldf ((ldc "skip whitespaces") (println) (rtn)))
+(ldf ((ldc "skip whitespaces") (println)
+      (ld 0) (println)
+      (ld 0) (cdr) (cdr) (ldc "") (eq)
+      (sel ((ldc "") (join))
+           ((ld 0) (cdr) (car) (ldc " ") (eq)
+            (ld 0) (println)
+            (join)))
+      (rtn)))
 (cons)
 
 ;; sexp parser `sp`: ((sp . (skip . (symp . lisp))) . (ch . rest)) -> sexp
 (ldf ((ld 0) (cdr) (cdr) (ldc "") (eq)
       (sel (;; end of string
-            (nil) (join))
+            (join))
            (;; skip whitespaces
-            ;; ...
+            (ld 0) (cdr)
+            (ld 0) (car) (cdr) (car)
+            (cons)
+            (ld 0) (car) (cdr) (car)
+            (ap)
             ;; list
             (ld 0) (cdr) (car) (ldc "(") (eq)
             (sel ((ld 0) (cdr) (cdr) (ch)
@@ -37,7 +48,8 @@
                   (cons)
                   (ld 0) (car) (cdr) (cdr) (car)
                   (ap)
-                  (join)))))
+                  (join)))
+            (join)))
       (rtn)))
 (cons)
 
