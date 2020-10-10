@@ -12,38 +12,23 @@ It has four registers, they point each stacks;
 - Code: code stack
 - Dump: stack to store temporary data like other stacks
 
-## How to run
+## Versions
 
-Clone it, 
+This is second version of *secdm*.
+At first time, I wrote this with Python3 but I cannot understood it, especially D register.
+I heard that D register is a continuation.
 
-```sh
-$ git clone https://github.com/t-sin/secdm.git
-$ cd secdm
-```
+In second version, I set those to goal:
 
-and run!
+- Understanding continuations and D register
+- Introducing side effects like `setq`
+- Introducing dynamic scope
+- Compiling from small Lisp onto SECD machine
 
-```
-$ python3 secdm.py --help
-SECD machine toys
+Here is a list of all version of *secdm*:
 
-USAGE: secdm.py [-hd] [PROGRAM]
-
-secdm.py is a machine code interpreter for Landin's SECD Machine. SECD Machine has
-only 21 instructions with some my extension about I/O.
-
-Running secdm.py without PROGRAM, it enters REPL mode.
-
-OPTIONS:
-        -d --debug   Print state of virtual machine on each steps.
-        -h --help    Print this message.
-
-# with interpreter
-$ python3 secdm.py
-
-# from source code
-$ python3 secdm.py program/test.s
-```
+- [first version (written in Python)](https://github.com/t-sin/secdm/releases/tag/python-implementation)
+- [second version (written in Common Lisp)](https://github.com/t-sin/secdm/)
 
 ## References
 
