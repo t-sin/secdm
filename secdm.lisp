@@ -163,6 +163,10 @@
                     (t nil))))
     (push res (vm-s vm))))
 
+(defop eq (vm)
+    "Check object equality between two values from S register."
+  (push (eql (pop (vm-s vm)) (pop (vm-s vm))) (vm-s vm)))
+
 (defop cons (vm)
     "Create cons cell with two values from S register."
   (let ((cdr (pop (vm-s vm)))
