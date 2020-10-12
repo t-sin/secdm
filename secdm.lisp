@@ -3,17 +3,10 @@
   (:export))
 (in-package #:secdm)
 
-(defstruct env
-  (type :lex :type (member :lex :dyn))
-  (parent nil :type (member nil env))
-  (table (make-hash-table)))
-
 (defstruct (vm (:constructor make-vm*))
   (debug-p nil)
   (step-p nil)
-  s
-  (e (make-env))
-  c d)
+  s e c d)
 
 (defmethod print-object ((vm vm) stream)
   (format stream
@@ -75,9 +68,9 @@
     "Load a constant to S register."
   (push n (vm-s vm)))
 
-(defop ld (vm name)
-    "Load a value named `name` from current envionment to S register."
-  (let ((v (gethash name (env-table (vm-e vm)))))
+(defop ld (vm idx)
+    "Load a value with `idx` in current envionment to S register."
+  (let ((v (elt (vm-e vm) idx)))
     (push v (vm-s vm))))
 
 (defop ldf (vm code)
