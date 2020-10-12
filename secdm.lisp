@@ -180,3 +180,39 @@
 (defop cdr (vm)
     "Get cons cell's cdr from the top value of S register."
   (push (cdr (pop (vm-s vm))) (vm-s vm)))
+
+(defop add (vm)
+    "Add two values."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (+ a b) (vm-s vm))))
+
+(defop sub (vm)
+    "Subtract two values."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (- a b) (vm-s vm))))
+
+(defop mul (vm)
+    "Multiply two values."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (* a b) (vm-s vm))))
+
+(defop div (vm)
+    "Divide two values."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (/ a b) (vm-s vm))))
+
+(defop rem (vm)
+    "Divide two values."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (mod a b) (vm-s vm))))
+
+(defop leq (vm)
+    "Check if `a` is less than or equals to `b`."
+  (let ((b (pop (vm-s vm)))
+        (a (pop (vm-s vm))))
+    (push (<= a b) (vm-s vm))))
