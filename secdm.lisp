@@ -64,6 +64,10 @@
          ,doc ,@body)
        (export ',fn-name :secdm/op))))
 
+(defop nil (vm)
+    "Load nil to S register."
+  (push nil (vm-s vm)))
+
 (defop ldc (vm n)
     "Load a constant to S register."
   (push n (vm-s vm)))
