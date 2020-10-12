@@ -39,12 +39,12 @@
 (defun run (vm)
   (loop
     (unless (run-1 vm)
-      (return-from run vm))
+      (return-from run))
     (when (vm-step-p vm)
       (if (or (format t "continue? (y/n): ")
               (eq (read *standard-input*) 'y))
           nil
-          (return-from run vm)))))
+          (return-from run)))))
 
 (defpackage #:secdm/op
   (:use))
