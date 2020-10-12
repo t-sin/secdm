@@ -77,3 +77,15 @@
     "Load a function to S register."
   (let ((f (list :fn :code code :env (vm-e vm))))
     (push f (vm-s vm))))
+
+(defop ap (vm)
+    "Apply a function to a value on top of S register."
+  (let ((f (pop (vm-s vm)))
+        (v (pop (vm-s vm))))
+    (assert (eq (car f) :fn))
+    (let ((dump (list (vm-s vm) (vm-e vm) (vm-c vm)))
+          (env (append (list v) (vm-e vm))))
+      (setf (vm-s vm) nil
+            (vm-e vm) env
+            (vm-c vm) (getf (cdr f) :code))
+      (push dump (vm-d vm)))))
