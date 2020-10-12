@@ -162,3 +162,17 @@
                     ((symbolp v) t)
                     (t nil))))
     (push res (vm-s vm))))
+
+(defop cons (vm)
+    "Create cons cell with two values from S register."
+  (let ((cdr (pop (vm-s vm)))
+        (car (pop (vm-s vm))))
+    (push (cons car cdr) (vm-s vm))))
+
+(defop car (vm)
+    "Get cons cell's car from the top value of S register."
+  (push (car (pop (vm-s vm))) (vm-s vm)))
+
+(defop cdr (vm)
+    "Get cons cell's cdr from the top value of S register."
+  (push (cdr (pop (vm-s vm))) (vm-s vm)))
