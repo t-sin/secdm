@@ -128,3 +128,23 @@
             (vm-e vm) env
             (vm-c vm) (getf (cdr f) :code))
       (push dump (vm-d vm)))))
+
+(defop sel (vm true false)
+    "Conditional branching in SECD machine.
+
+    This operator takes two arguments true clause and false clause.
+    If the value of top of S stack is true the machine executes true clause,
+    otherwize the machine executes false one.
+    Each clause should be ended with `join`, the brancing termination operator."
+  (let ((v (pop (vm-s vm)))
+        (dump (list :s nil :e nil :c (vm-c vm))))
+    (push dump (vm-d vm))
+    (setf (vm-c vm) (if v true false))))
+
+(defop join (vm)
+    "Terminate branching.
+
+    True/False causes for `sel` should ends with this operator."
+  (let ((dump (pop (vm-d vm))))
+    (setf (vm-c vm) (getf dump :c))))
+
