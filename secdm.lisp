@@ -111,11 +111,14 @@
 (defop rap (vm)
     "Apply a function recursively.
 
-    This operator assumes that the function `f` has :omega in its environment."
+    This operator assumes that the function `f` has :omega in front of its environment.
+    So before `ldf` user should call `dum`."
   (let ((f (pop (vm-s vm)))
         (v (pop (vm-s vm))))
     (assert (eq (car f) :fn))
-    (let ((dump (list :s (vm-s vm) :e (cdr (vm-e vm)) :c (vm-c vm)))
+    (let ((dump (list :s (vm-s vm)
+                      :e (cdr (vm-e vm))  ; dumps :omega removed environment
+                      :c (vm-c vm)))
           (env (getf (cdr f) :env)))
       (rplaca env v)  ; replace :omega
       (setf (vm-s vm) nil
