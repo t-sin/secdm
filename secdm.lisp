@@ -11,7 +11,9 @@
 (defstruct (vm (:constructor make-vm*))
   (debug-p nil)
   (step-p nil)
-  s e c d)
+  s
+  (e (make-env))
+  c d)
 
 (defmethod print-object ((vm vm) stream)
   (format stream
@@ -71,3 +73,10 @@
 
   The constant is specified as second element of the operator list."
   (push n (vm-s vm)))
+
+(defop ld (vm name)
+  "Load a value named `name` from current envionment.
+
+  `name` is specified as second element of the operator list."
+  (let ((v (gethash name (env-table (vm-e vm)))))
+    (push v (vm-s vm))))
