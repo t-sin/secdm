@@ -59,12 +59,15 @@
   (let ((code (ensure-secdm-package code)))
     (make-vm* :c code :debug-p debug-p)))
 
-(defmacro defop (name (&rest args) &body body)
+(defmacro defop (name (&rest args) doc &body body)
   (let ((fn-name (intern (symbol-name name) :secdm/op)))
     `(progn
        (defun ,fn-name ,args
-         ,@body)
+         ,doc ,@body)
        (export ',fn-name :secdm/op))))
 
 (defop ldc (vm n)
+  "Load a constant.
+
+  The constant is specified as second element of the operator list."
   (push n (vm-s vm)))
