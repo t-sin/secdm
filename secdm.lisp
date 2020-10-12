@@ -72,14 +72,10 @@
        (export ',fn-name :secdm/op))))
 
 (defop ldc (vm n)
-  "Load a constant.
-
-  The constant is specified as second element of the operator list."
+    "Load a constant to S register."
   (push n (vm-s vm)))
 
 (defop ld (vm name)
-  "Load a value named `name` from current envionment.
-
-  `name` is specified as second element of the operator list."
+    "Load a value named `name` from current envionment to S register."
   (let ((v (gethash name (env-table (vm-e vm)))))
     (push v (vm-s vm))))
