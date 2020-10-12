@@ -6,6 +6,7 @@
 (defstruct (vm (:constructor make-vm*))
   (debug-p nil)
   (step-p nil)
+  (running-p t)
   s e c d)
 
 (defmethod print-object ((vm vm) stream)
@@ -27,7 +28,9 @@
           (args (cdr op)))
       (assert (symbolp name))
       (apply name vm args)
-      t)))
+      (if (vm-running-p vm)
+          t
+          nil))))
 
 (defun run (vm)
   (loop
@@ -148,3 +151,6 @@
   (let ((dump (pop (vm-d vm))))
     (setf (vm-c vm) (getf dump :c))))
 
+(defop stop (vm)
+    "Stop VM."
+  (setf (vm-running-p vm) nil))
