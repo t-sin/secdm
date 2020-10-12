@@ -21,6 +21,9 @@
           (vm-s vm) (vm-e vm) (vm-c vm) (vm-d vm)))
 
 (defun run-1 (vm)
+  "Run one step of evaluation.
+
+  Each operators are given as a list like `(ldc 1)`."
   (when (vm-debug-p vm)
     (format t "~s" vm))
   (when (null (vm-c vm))
