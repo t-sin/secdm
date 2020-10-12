@@ -10,6 +10,7 @@
 
 (defstruct (vm (:constructor make-vm*))
   (debug-p nil)
+  (step-p nil)
   s e c d)
 
 (defmethod print-object ((vm vm) stream)
@@ -29,6 +30,16 @@
       (assert (symbolp name))
       (apply name vm args)
       t)))
+
+(defun run (vm)
+  (loop
+    (unless (run-1 vm)
+      (return-from run vm))
+    (when (vm-step-p vm)
+      (if (or (format t "continue? (y/n): ")
+              (eq (read *standard-input*) 'y))
+          nil
+          (return-from run vm)))))
 
 (defpackage #:secdm/op
   (:use))
