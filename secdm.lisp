@@ -87,7 +87,7 @@
   (let ((f (pop (vm-s vm)))
         (v (pop (vm-s vm))))
     (assert (eq (car f) :fn))
-    (let ((dump (list (vm-s vm) (vm-e vm) (vm-c vm)))
+    (let ((dump (list :s (vm-s vm) :e (vm-e vm) :c (vm-c vm)))
           (env (append (list v) (vm-e vm))))
       (setf (vm-s vm) nil
             (vm-e vm) env
