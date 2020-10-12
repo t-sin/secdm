@@ -50,7 +50,10 @@
              (numberp code))
          code)
         ((symbolp code) (intern (symbol-name code) :secdm/symbol))
-        ((consp code) (cons (ensure-secdm-package (car code))
+        ((consp code) (cons (let ((car (car code)))
+                              (if (null car)
+                                  (ensure-secdm-package :nil)
+                                  (ensure-secdm-package car)))
                             (ensure-secdm-package (cdr code))))))
 
 (defun make-vm (debug-p code)
