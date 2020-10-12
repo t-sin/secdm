@@ -101,3 +101,24 @@
     (setf (vm-s vm) (append (list v) (getf dump :s))
           (vm-e vm) (getf dump :e)
           (vm-c vm) (getf dump :c))))
+
+(defop dum (vm)
+    "Load a dummy value to current enviroment.
+
+    This dummy value :omega will be replaced by `rap` operator."
+  (push :omega (vm-e vm)))
+
+(defop rap (vm)
+    "Apply a function recursively.
+
+    This operator assumes that the function `f` has :omega in its environment."
+  (let ((f (pop (vm-s vm)))
+        (v (pop (vm-s vm))))
+    (assert (eq (car f) :fn))
+    (let ((dump (list :s (vm-s vm) :e (vm-e vm) :c (vm-c vm)))
+          (env (getf (cdr f) :env)))
+      (rplaca env v)  ; replace :omega
+      (setf (vm-s vm) nil
+            (vm-e vm) env
+            (vm-c vm) (getf (cdr f) :code))
+      (push dump (vm-d vm)))))
