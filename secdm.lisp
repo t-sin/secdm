@@ -5,7 +5,7 @@
 
 (defstruct env
   (type :lex :type (member :lex :dyn))
-  (parent nil :type env)
+  (parent nil :type (member nil env))
   (table (make-hash-table)))
 
 (defstruct (vm (:constructor make-vm*))
