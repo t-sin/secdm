@@ -52,5 +52,5 @@
          ,@body)
        (export ',fn-name :secdm/op))))
 
-(defop ld (vm n)
+(defop ldc (vm n)
   (push n (vm-s vm)))
