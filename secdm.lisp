@@ -20,12 +20,15 @@
 (defun run-1 (vm)
   (when (vm-debug-p vm)
     (format t "~s" vm))
+  (when (null (vm-c vm))
+    (return-from run-1 nil))
   (let ((op (pop (vm-c vm))))
     (assert (listp op))
     (let ((name (car op))
           (args (cdr op)))
       (assert (symbolp name))
-      (apply name vm args))))
+      (apply name vm args)
+      t)))
 
 (defpackage #:secdm/op
   (:use))
