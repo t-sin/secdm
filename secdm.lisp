@@ -115,7 +115,7 @@
   (let ((f (pop (vm-s vm)))
         (v (pop (vm-s vm))))
     (assert (eq (car f) :fn))
-    (let ((dump (list :s (vm-s vm) :e (vm-e vm) :c (vm-c vm)))
+    (let ((dump (list :s (vm-s vm) :e (cdr (vm-e vm)) :c (vm-c vm)))
           (env (getf (cdr f) :env)))
       (rplaca env v)  ; replace :omega
       (setf (vm-s vm) nil
