@@ -7,10 +7,15 @@
 (defun compile-lisp-1 (code)
   "Compile Lisp code to SECD machine code."
   (typecase code
-    (t (list 'ldc code))))
+    (list (let ((op (car code)))
+            (assert (symbolp op))
+            (let ((name (intern (symbol-name op) :keyword)))
+              (case name
+                (:atom `(,@(compile-lisp-1 (cadr code)) (atom)))))))
+    (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
   "Compile multiple Lisp code to SECD machine code."
   (loop
     :for code :in code-list
-    :collect (compile-lisp-1 code)))
+    :append (compile-lisp-1 code)))
