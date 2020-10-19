@@ -18,7 +18,10 @@
                 ;; 2-arity functions
                 (:cons `(,@(compile-lisp-1 (second code))
                          ,@(compile-lisp-1 (third code))
-                         (cons)))))))
+                         (cons)))
+                (:eq `(,@(compile-lisp-1 (second code))
+                       ,@(compile-lisp-1 (third code))
+                       (eq)))))))
     (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
