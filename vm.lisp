@@ -25,17 +25,17 @@
           "VM:~%  S: ~s~%  E: ~s~%  C: ~s~%  D: ~s~%"
           (vm-s vm) (vm-e vm) (vm-c vm) (vm-d vm)))
 
-(defpackage #:secdm/op
+(defpackage #:secdm.op
   (:use))
 
-(defpackage #:secdm/symbol
-  (:use #:secdm/op))
+(defpackage #:secdm.symbol
+  (:use #:secdm.op))
 
 (defun ensure-secdm-package (code)
   (cond ((or (null code)
              (numberp code))
          code)
-        ((symbolp code) (intern (symbol-name code) :secdm/symbol))
+        ((symbolp code) (intern (symbol-name code) :secdm.symbol))
         ((consp code) (cons (let ((car (car code)))
                               (if (null car)
                                   (ensure-secdm-package :nil)
@@ -75,11 +75,11 @@
           (return-from run)))))
 
 (defmacro defop (name (&rest args) doc &body body)
-  (let ((fn-name (intern (symbol-name name) :secdm/op)))
+  (let ((fn-name (intern (symbol-name name) :secdm.op)))
     `(progn
        (defun ,fn-name ,args
          ,doc ,@body)
-       (export ',fn-name :secdm/op))))
+       (export ',fn-name :secdm.op))))
 
 (defop nil (vm)
     "Load nil to S register."
