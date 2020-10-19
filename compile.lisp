@@ -11,7 +11,14 @@
             (assert (symbolp op))
             (let ((name (intern (symbol-name op) :keyword)))
               (case name
-                (:atom `(,@(compile-lisp-1 (cadr code)) (atom)))))))
+                ;; 1-arity functions
+                (:atom `(,@(compile-lisp-1 (second code)) (atom)))
+                (:car `(,@(compile-lisp-1 (second code)) (car)))
+                (:cdr `(,@(compile-lisp-1 (second code)) (cdr)))
+                ;; 2-arity functions
+                (:cons `(,@(compile-lisp-1 (second code))
+                         ,@(compile-lisp-1 (third code))
+                         (cons)))))))
     (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
