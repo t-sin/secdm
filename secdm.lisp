@@ -9,7 +9,7 @@
   (running-p t)
   s e c d)
 
-(defmethod print-object ((vm vm) stream)
+(defun print-vm (vm)
   (format stream
           "VM:~%  S: ~s~%  E: ~s~%  C: ~s~%  D: ~s~%"
           (vm-s vm) (vm-e vm) (vm-c vm) (vm-d vm)))
