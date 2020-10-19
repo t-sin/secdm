@@ -6,10 +6,11 @@
 
 (defun compile-lisp-1 (code)
   "Compile Lisp code to SECD machine code."
-  nil)
+  (typecase code
+    (t (list 'ldc code))))
 
 (defun compile-lisp (code-list)
   "Compile multiple Lisp code to SECD machine code."
   (loop
     :for code :in code-list
-    :append (compile-lisp-1 code)))
+    :collect (compile-lisp-1 code)))
