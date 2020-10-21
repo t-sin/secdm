@@ -4,6 +4,13 @@
            #:compile-lisp))
 (in-package #:secdm.compile)
 
+(defun compile-lambda (args body)
+  "0-arity function is ether a constant or process that has side effect."
+  ;; maybe wip
+  (if (null args)
+      (compile-lisp-1 body)
+      `((ldf ,(compile-lambda (cdr args) body)))))
+
 (defun compile-lisp-1 (code)
   "Compile Lisp code to SECD machine code."
   (typecase code
@@ -29,7 +36,8 @@
                            (false (fourth code)))
                        `(,@(compile-lisp-1 cond)
                          (sel (,@(compile-lisp-1 true) (join))
-                              (,@(compile-lisp-1 false) (join))))))))))
+                              (,@(compile-lisp-1 false) (join))))))
+                (:lambda (compile-lambda (second code) (third code)))))))
     (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
