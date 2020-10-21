@@ -21,7 +21,9 @@
                          (cons)))
                 (:eq `(,@(compile-lisp-1 (second code))
                        ,@(compile-lisp-1 (third code))
-                       (eq)))))))
+                       (eq)))
+                ;; special forms
+                (:quote `((ldc ,(second code))))))))
     (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
