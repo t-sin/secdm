@@ -23,7 +23,13 @@
                        ,@(compile-lisp-1 (third code))
                        (eq)))
                 ;; special forms
-                (:quote `((ldc ,(second code))))))))
+                (:quote `((ldc ,(second code))))
+                (:if (let ((cond (second code))
+                           (true (third code))
+                           (false (fourth code)))
+                       `(,@(compile-lisp-1 cond)
+                         (sel (,@(compile-lisp-1 true) (join))
+                              (,@(compile-lisp-1 false) (join))))))))))
     (t `((ldc ,code)))))
 
 (defun compile-lisp (code-list)
