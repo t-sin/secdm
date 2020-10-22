@@ -4,6 +4,18 @@
            #:compile-lisp))
 (in-package #:secdm.compile)
 
+(defun find-variable (v code)
+  (if (null code)
+      nil
+      (let ((bound-p nil))
+        (dolist (c (rest code))
+          (setf bound-p (or bound-p
+                            (typecase c
+                              (symbol (eq v c))
+                              (list (find-variable v c))
+                              (t nil)))))
+        bound-p)))
+
 (defun compile-lambda (args body)
   "0-arity function is ether a constant or process that has side effect."
   ;; maybe wip
