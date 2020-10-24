@@ -20,14 +20,14 @@
   (compiling-name nil)
   (name-table (make-hash-table)))
 
-(defun compile-lambda (args body)
+(defun compile-lambda (args body state)
   "0-arity function is ether a constant or process that has side effect."
   ;; maybe wip
   (if (null args)
-      (compile-lisp-1 body)
-      `((ldf ,(compile-lambda (cdr args) body)))))
+      (compile-lisp-1 body state)
+      `((ldf ,(compile-lambda (cdr args) body state)))))
 
-(defun compile-lisp-1 (code)
+(defun compile-lisp-1 (code state)
   "Compile Lisp code to SECD machine code."
   (typecase code
     (list (let ((op (car code)))
@@ -58,6 +58,7 @@
 
 (defun compile-lisp (code-list)
   "Compile multiple Lisp code to SECD machine code."
-  (loop
-    :for code :in code-list
-    :append (compile-lisp-1 code)))
+  (let ((state (make-compiler-state)))
+    (loop
+      :for code :in code-list
+      :append (compile-lisp-1 code state))))
