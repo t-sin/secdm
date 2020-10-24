@@ -16,6 +16,10 @@
                               (t nil)))))
         bound-p)))
 
+(defstruct compiler-state
+  (compiling-name nil)
+  (name-table (make-hash-table)))
+
 (defun compile-lambda (args body)
   "0-arity function is ether a constant or process that has side effect."
   ;; maybe wip
