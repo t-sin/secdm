@@ -64,6 +64,8 @@
             (assert (symbolp op))
             (let ((name (intern (symbol-name op) :keyword)))
               (case name
+                ;; 0-arity functon
+                (:nil `((ldc nil)))
                 ;; 1-arity functions
                 (:atom `(,@(compile-lisp-1 (second code) state) (atom)))
                 (:car `(,@(compile-lisp-1 (second code) state) (car)))
