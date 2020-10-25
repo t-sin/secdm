@@ -24,7 +24,7 @@
   (compiling-name nil)
   (name-table (make-hash-table)))
 
-(defun compile-lambda (args body state &optional (argnum (1- (length args))))
+(defun compile-lambda-1 (args arglen body state)
   "Compile lambda expression to SECD machine code.
 
   Because functions in SECD machine are curried, so multiple number of arguments are
@@ -36,26 +36,44 @@
   there is no 0-arity function."
   (if (null args)
       (compile-lisp-1 body state)
-      (let ((args* (cdr args))
-            (body* (replace-arg (car args) argnum body)))
-        (let ((inner (compile-lambda args* body* state (1- argnum))))
+      (let* ((arglen* (length args))
+             (args* (cdr args))
+             (body* (replace-arg (car args) (- arglen arglen*) body)))
+        (let ((inner (compile-lambda-1 args* arglen body* state))
+              (arg-exist-p (> arglen* 1)))
           ;; argnum should be replaced with actual argument code when function application
-          `((ldf (,@(unless (zerop argnum) (list argnum)) ,@inner (rtn))) (ap))))))
+          (if arg-exist-p
+              `((ldf (,arglen* ,@inner (ap) (rtn))))
+              `((ldf (,@inner (rtn)))))))))
 
-(defun compile-apply (args code state)
-  "Compile function application.
+(defun compile-lambda (args body state)
+  "compile lambda expression to secd machine code.
 
-  This function replaces argument marker with actual actument expression."
+  this function compiles starter function to recursive function call."
+  (let ((rec-body (replace-arg (compiler-state-compiling-name state) 0 body))
+        (arglen (length args)))
+    (compile-lambda-1 args arglen rec-body state)))
+
+(defun compile-apply-1 (args code state)
   (if (null args)
       code
       (let* ((op (first code))
              (op-name (first op))
              (op-body (second op)))
         (if (and (eq op-name 'ldf) (numberp (first op-body)))
-            `((ldf (,@(compile-lisp-1 (elt args 0) state)
-                    ,@(compile-apply (cdr args) (rest op-body) state)))
+            `((ldf (,@(compile-lisp-1 (first args) state)
+                    ,@(compile-apply-1 (cdr args) (rest op-body) state)))
               ,@(rest code))
             code))))
+
+(defun compile-apply (args code state)
+  "compile function application.
+
+  this function replaces argument marker with actual actument expression."
+  `((dum)
+    ,@(compile-apply-1 (rest args) code state)
+    (ldf (,@(compile-lisp-1 (first args) state) (ld 0) (ap) (rtn)))
+    (rap)))
 
 (defun compile-lisp-1 (code state)
   "Compile Lisp code to SECD machine code."
@@ -71,7 +89,7 @@
                 (:car `(,@(compile-lisp-1 (second code) state) (car)))
                 (:cdr `(,@(compile-lisp-1 (second code) state) (cdr)))
                 ;; 2-arity functions
-                (:cons `(,@(compile-lisp-1 (second code) state)
+                (:cons`(,@(compile-lisp-1 (second code) state)
                          ,@(compile-lisp-1 (third code) state)
                          (cons)))
                 (:eq `(,@(compile-lisp-1 (second code) state)
@@ -102,9 +120,7 @@
                      (let ((vcode (gethash name (compiler-state-name-table state))))
                        (when (null vcode)
                          (error "undefined name `~s`." name))
-                       (let ((fncode (compile-apply (rest args) vcode state)))
-                       `(,@(compile-lisp-1 (first args) state)
-                         ,@fncode)))))))))
+                       `(,@(compile-apply args vcode state)))))))))
     (keyword `((ld ,(parse-integer (symbol-name code)))))
     (symbol (let ((val (gethash code (compiler-state-name-table state))))
               (if val
