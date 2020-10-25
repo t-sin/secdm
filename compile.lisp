@@ -21,6 +21,8 @@
           code)))
 
 (defstruct compiler-state
+  (number-of-rap 0)
+  (apply-p nil)
   (compiling-name nil)
   (name-table (make-hash-table)))
 
@@ -36,14 +38,15 @@
   there is no 0-arity function."
   (if (null args)
       (compile-lisp-1 body state)
-      (let* ((arglen* (length args))
+      (let* ((n-rap (compiler-state-number-of-rap state))
+             (arglen* (length args))
              (args* (cdr args))
              (body* (replace-arg (car args) (- arglen arglen*) body)))
         (let ((inner (compile-lambda-1 args* arglen body* state))
               (arg-exist-p (> arglen* 1)))
           ;; argnum should be replaced with actual argument code when function application
           (if arg-exist-p
-              `((ldf (,arglen* ,@inner (ap) (rtn))))
+              `((ldf (,(+ arglen* n-rap) ,@inner (ap) (rtn))))
               `((ldf (,@inner (rtn)))))))))
 
 (defun compile-lambda (args body state)
@@ -70,10 +73,20 @@
   "compile function application.
 
   this function replaces argument marker with actual actument expression."
-  `((dum)
-    ,@(compile-apply-1 (rest args) code state)
-    (ldf (,@(compile-lisp-1 (first args) state) (ld 0) (ap) (rtn)))
-    (rap)))
+  (unwind-protect
+       (progn
+         (setf (compiler-state-apply-p state) t)
+         (incf (compiler-state-number-of-rap state))
+         `((dum)
+           ,@(compile-apply-1 (rest args) code state)
+           (ldf (,@(compile-lisp-1 (first args) state)
+                 (ld ,(1- (compiler-state-number-of-rap state)))
+                 (ld 0)
+                 (ap) (rtn)))
+           (rap)))
+    (progn
+      (setf (compiler-state-apply-p state) nil)
+      (decf (compiler-state-number-of-rap state)))))
 
 (defun compile-lisp-1 (code state)
   "Compile Lisp code to SECD machine code."
@@ -116,12 +129,20 @@
                                (error "`~s` is not a symbol." name))))
                 ;; function applications
                 (t (let ((name (first code))
-                         (args (rest code)))
-                     (let ((vcode (gethash name (compiler-state-name-table state))))
-                       (when (null vcode)
-                         (error "undefined name `~s`." name))
-                       `(,@(compile-apply args vcode state)))))))))
-    (keyword `((ld ,(parse-integer (symbol-name code)))))
+                         (args (rest code))
+                         (n-rap (compiler-state-number-of-rap state)))
+                     (unwind-protect
+                          (let ((vcode (if (keywordp name)
+                                           (progn
+                                             (incf (compiler-state-number-of-rap state))
+                                             `((ld ,n-rap)))
+                                           (gethash name (compiler-state-name-table state)))))
+                            (when (null vcode)
+                              (error "undefined name `~s`." name))
+                            `(,@(compile-apply args vcode state)))
+                       (setf (compiler-state-number-of-rap state) n-rap))))))))
+    (keyword `((ld ,(+ (parse-integer (symbol-name code))
+                       (compiler-state-number-of-rap state)))))
     (symbol (let ((val (gethash code (compiler-state-name-table state))))
               (if val
                   val
